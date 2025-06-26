@@ -1,7 +1,7 @@
 # Face Recognition System Program Design Report
 ## 1. Abstract
 In our face recognition project, we developed a real-time facial recognition program based on Principal Component Analysis (PCA). Initially, we created a system capable of identifying faces in real time. Subsequently, we conducted extensive testing by varying the dimensions reduced using PCA and exploring different face recognition methods (NCC, k-NN, SVM). After rigorous evaluation, we identified the optimal dimensionality reduction and face recognition technique, achieving and impressive accuracy rate of 95.3%. Our report concludes by summarizing the challenges encountered during the project and the corresponding solutions.
-``` mermaid
+```mermaid
 graph TD
     A[Camera] --> B[Get testing set]
     C[Video] --> D[Get training set]
