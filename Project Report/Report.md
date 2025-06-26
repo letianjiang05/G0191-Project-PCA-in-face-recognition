@@ -1,6 +1,28 @@
 # Face Recognition System Program Design Report
-## 
-
+## 1. Abstract
+In our face recognition project, we developed a real-time facial recognition program based on Principal Component Analysis (PCA). Initially, we created a system capable of identifying faces in real time. Subsequently, we conducted extensive testing by varying the dimensions reduced using PCA and exploring different face recognition methods (NCC, k-NN, SVM). After rigorous evaluation, we identified the optimal dimensionality reduction and face recognition technique, achieving and impressive accuracy rate of 95.3%. Our report concludes by summarizing the challenges encountered during the project and the corresponding solutions.
+``` Mermaid
+graph TD
+    A[Camera] --> B[Get testing set]
+    C[Video] --> D[Get training set]
+    E[Camera] --> D
+    D --> F[Preprocessing]
+    B --> G[Preprocessing]
+    F --> H[Histogram Equalization]
+    G --> I[Histogram Equalization]
+    H --> J[Dimensionality reduction based on PCA]
+    I --> K[Dimensionality reduction based on PCA]
+    K --> L[Calculate the average face of each person]
+    I --> M[20*30 face images]
+    M --> N[600 gray face images with pixels of 100*100]
+    N --> O[Improve contrast and clarity]
+    O --> P[600 matrices of 1*100]
+    P --> Q[Get 20 average matrices (center points)]
+    J --> R[Recognition and comparison based on k-NNR]
+    L --> R
+    Q --> R
+    R --> S[Result]
+```
 #### 3.1.3 Support Vector Machines (SVM)
 ##### Pros
 - Effective in high dimensional spaces: SVMs are effective when the number of dimensions is greater than the number of samples.
