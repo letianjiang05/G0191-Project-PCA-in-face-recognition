@@ -17,7 +17,7 @@ graph TD
     M --> N[600 gray face images with pixels of 100*100]
     N --> O[Improve contrast and clarity]
     O --> P[600 matrices of 1*100]
-    P --> Q[Get 20 average matrices (center points)]
+    P --> Q["Get 20 average matrices (center points)"]
     J --> R[Recognition and comparison based on k-NNR]
     L --> R
     Q --> R
