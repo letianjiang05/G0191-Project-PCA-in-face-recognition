@@ -7,7 +7,7 @@ In our face recognition project, we developed a real-time facial recognition pro
 graph TD
     A[Camera] --> B[Get testing set]
     C[Video] --> D[Get training set]
-    E[Camera] --> F[20*30 face images<br>20 people, 30 pictures each]
+    E[Camera] --> F[20*30 face images - 20 people, 30 pictures each]
     F --> G[600 face images with pixels of 100*100]
     G --> H[600 matrices of 1*100]
     B --> I[Uniform image size]
