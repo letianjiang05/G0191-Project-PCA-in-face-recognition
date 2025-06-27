@@ -49,36 +49,129 @@ In this session, we test the performance of our program through two cases. One i
 Among them, NCC and k-NNR both use the Euclidean distance between the training vector and the test vector to calculate the training vector closest to the test vector. However, NCC calculates the average vector of which training vector the test vector is closest to. And k-NNR calculates which category has the most among the k training vectors closest to the test vector.
 #### Using k-NNR for face recognition:
 ```python
-# Calculate the distance between each test vector and the average vector
+# Calculate the Euclidean norm between each test vector
+# and each training vector
 for i in range(len(X_test)):
     test_vector = X_test[i]
-    
-    # Normalize the test vector
+
+    # Normalized test vector
     test_vector = test_vector - np.mean(test_vector, axis=0)
 
-    # PCA for the test vector
-    test_vector = np.dot(test_vector,P)
-    
-    # Initialize a list to store the euclidean norm between each training vector and the current test vector
+    # PCA on test vectors
+    test_vector = np.dot(test_vector, P)
+
+    # Initialize a list to store the Euclidean norm of each training vector
+    # and the current test vector
     distances = []
-    
-    # Calculate the euclidean norm and add it to the list
-    for j in range(len(X_train_average)):
-        train_vector = X_train_average[j]
-        
-        # Calculate the euclidean norm
-        distance = np.linalg.norm(train_vector - test_vector)
-        distances.append(distance)
-        
-    # Find the training vector with the smallest euclidean norm
-    min_distances_index = np.argmin(distances)
-    
+
+    for j in range(len(X_train_pca)):
+        train_vector = X_train_pca[j]
+        dist = np.sqrt(np.sum((train_vector - test_vector) ** 2))
+        distances.append(dist)
+
+    # Find the k nearest neighbors
+    nearest_indices = np.argsort(distances)[:4]
+
+    # Find the most frequent index
+    counts = Counter(nearest_indices // 10 + 1)
+    most_common_index = counts.most_common(1)[0][0]
+
     # Check if the indexes are the same
-    if min_distances_index + 1 == (i // 30) +1:
+    if most_common_index == (i // 30) + 1:
         true_count += 1
-        print(i)
+
+    #print(i)
 ```
 Using NCC for face recognition:
+```python
+# Calculate the Euclidean norm between each test vector
+# and each average training vector
+for i in range(len(X_test)):
+    test_vector = X_test[i]
+
+    # Normalized test vector
+    test_vector = test_vector - np.mean(test_vector, axis=0)
+
+    # PCA on test vectors
+    test_vector = np.dot(test_vector, P)
+
+    # Initialize a list to store the Euclidean norm of each training vector
+    # and the current test vector
+    distances = []
+
+    for j in range(len(X_train_average)):
+        train_vector = X_train_average[j]
+        distance = np.linalg.norm(train_vector - test_vector)
+        distances.append(distance)
+
+    # Find the training vector index with minimum distance
+    min_distances_index = np.argmin(distances)
+
+    # Check if the indexes are the same
+    if min_distances_index + 1 == (i // 30) + 1:
+        true_count += 1
+```
+#### Using SVM for face recognition:
+```python
+class MultiClassSVM:
+    def __init__(self, X, y, k, C=1, tol=1e-5, max_iter=1000, learning_rate=0.01):
+        self.X = X
+        self.y = y
+        self.k = k
+        self.C = C
+        self.tol = tol
+        self.max_iter = max_iter
+        self.learning_rate = learning_rate
+        self.n_samples, self.n_features = X.shape
+        self.n_classes = len(np.unique(y))
+        self.W = np.random.rand(self.n_features, self.n_classes)
+        self.b = np.random.rand(self.n_classes)
+        self.losses = []
+
+    def hinge_loss(self, X, y, W, b):
+        scores = np.dot(X, W) + b
+        correct_class_score = scores[np.arange(self.n_samples), y]
+        margins = np.maximum(0, scores - correct_class_score[:, np.newaxis] + 1)
+        margins[np.arange(self.n_samples), y] = 0
+        margins[margins > 0] = 1
+        loss = np.sum(margins) / self.n_samples
+        return loss
+
+    def fit(self):
+        for i in range(self.max_iter):
+            scores = np.dot(self.X, self.W) + self.b
+            correct_class_score = scores[np.arange(self.n_samples), self.y]
+            margins = np.maximum(0, scores - correct_class_score[:, np.newaxis] + 1)
+            margins[np.arange(self.n_samples), self.y] = 0
+            margins[margins > 0] = 1
+            row_sum = np.sum(margins, axis=1)
+            margins[np.arange(self.n_samples), self.y] = -row_sum
+            dW = np.dot(self.X.T, margins) / self.n_samples
+            db = np.sum(margins, axis=0) / self.n_samples
+            dW += self.C * self.W
+            self.W -= self.learning_rate * dW
+            self.b -= self.learning_rate * db
+            loss = self.hinge_loss(self.X, self.y, self.W, self.b)
+            self.losses.append(loss)
+            if i % 10 == 0:
+                print(f'Iter %d / %d: loss %f' % (i, self.max_iter, loss))
+
+    def predict(self, X):
+        scores = np.dot(X, self.W) + self.b
+        y_pred = np.argmax(scores, axis=1)
+        return y_pred
+
+    def score(self, X, y):
+        y_pred = self.predict(X)
+        accuracy = np.mean(y_pred == y)
+        return accuracy
+
+    def get_params(self):
+        return self.W, self.b
+
+    def get_losses(self):
+        return self.losses
+```
 #### 3.1.3 Support Vector Machines (SVM)
 ##### Pros
 - Effective in high dimensional spaces: SVMs are effective when the number of dimensions is greater than the number of samples.
