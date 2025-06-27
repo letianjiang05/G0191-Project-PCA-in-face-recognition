@@ -47,9 +47,38 @@ grayscale. The classifier detects faces in the grayscale frame using detectMulti
 ### 3.1.Introduction
 In this session, we test the performance of our program through two cases. One is the algorithm of face recognition. Another is the Dimension of images through PCA. For the first case, to perform the experiment, we compared three different recognition algorithms horizontally, which are Nearest Center Classifier (NCC) , k-Nearest Neighbor Rule (k-NNR), and Support Vector Machines (SVM), to fine the one with the highest accuracy.
 Among them, NCC and k-NNR both use the Euclidean distance between the training vector and the test vector to calculate the training vector closest to the test vector. However, NCC calculates the average vector of which training vector the test vector is closest to. And k-NNR calculates which category has the most among the k training vectors closest to the test vector.
-Using k-NNR for face recognition:
+#### Using k-NNR for face recognition:
 ```python
+# Calculate the distance between each test vector and the average vector
+for i in range(len(X_test)):
+    test_vector = X_test[i]
+    
+    # Normalize the test vector
+    test_vector = test_vector - np.mean(test_vector, axis=0)
+
+    # PCA for the test vector
+    test_vector = np.dot(test_vector,P)
+    
+    # Initialize a list to store the euclidean norm between each training vector and the current test vector
+    distances = []
+    
+    # Calculate the euclidean norm and add it to the list
+    for j in range(len(X_train_average)):
+        train_vector = X_train_average[j]
+        
+        # Calculate the euclidean norm
+        distance = np.linalg.norm(train_vector - test_vector)
+        distances.append(distance)
+        
+    # Find the training vector with the smallest euclidean norm
+    min_distances_index = np.argmin(distances)
+    
+    # Check if the indexes are the same
+    if min_distances_index + 1 == (i // 30) +1:
+        true_count += 1
+        print(i)
 ```
+Using NCC for face recognition:
 #### 3.1.3 Support Vector Machines (SVM)
 ##### Pros
 - Effective in high dimensional spaces: SVMs are effective when the number of dimensions is greater than the number of samples.
@@ -64,7 +93,7 @@ Using k-NNR for face recognition:
 ```
 
 ## 3.2 Comparison among Different Algorithms of face recognitio
-Results of Different Algorithms
+### Results of Different Algorithms
 | Average Accuracy | KNNR | NCC  | SVM  |
 |------------------|------|------|------|
 | 20               | 0.943333 | 0.908333 | 0.908333 |
@@ -78,7 +107,68 @@ Results of Different Algorithms
 | 100              | 0.948333 | 0.9116667 | 0.9183333 |
 | 110              | 0.948333 | 0.9116667 | 0.9183333 |
 | 120              | 0.948333 | 0.9116667 | 0.9183333 |
+## 3.3 Comparison among Different Dimensions of images through PCA
+### KNNR
+| Dimension | Cases 1 | Cases 2 | Cases 3 | Cases 4 | Cases 5 | Average |
+|-----------|---------|---------|---------|---------|---------|---------|
+| 20        | 0.9433333 | 0.9433333 | 0.9433333 | 0.9433333 | 0.9433333 | 0.9433333 |
+| 30        | 0.95     | 0.95     | 0.95     | 0.95     | 0.95     | 0.95     |
+| 40        | 0.95     | 0.95     | 0.95     | 0.95     | 0.95     | 0.95     |
+| 50        | 0.9483333 | 0.9483333 | 0.9483333 | 0.9483333 | 0.9483333 | 0.9483333 |
+| 60        | 0.9483333 | 0.9483333 | 0.9483333 | 0.9483333 | 0.9483333 | 0.9483333 |
+| 70        | 0.9483333 | 0.9483333 | 0.9483333 | 0.9483333 | 0.9483333 | 0.9483333 |
+| 80        | 0.9483333 | 0.9483333 | 0.9483333 | 0.9483333 | 0.9483333 | 0.9483333 |
+| 90        | 0.9483333 | 0.9483333 | 0.9483333 | 0.9483333 | 0.9483333 | 0.9483333 |
+| 100       | 0.9483333 | 0.9483333 | 0.9483333 | 0.9483333 | 0.9483333 | 0.9483333 |
+| 110       | 0.9483333 | 0.9483333 | 0.9483333 | 0.9483333 | 0.9483333 | 0.9483333 |
+| 120       | 0.9483333 | 0.9483333 | 0.9483333 | 0.9483333 | 0.9483333 | 0.9483333 |
+
+### Time (s) for KNNR
+| Dimension | Cases 1 | Cases 2 | Cases 3 | Cases 4 | Cases 5 | Average |
+|-----------|---------|---------|---------|---------|---------|---------|
+| 20        | 1.6638116 | 1.5207074 | 1.5779807 | 1.4990960 | 1.7039218 | 1.59310350 |
+| 30        | 1.5100508 | 1.6826395 | 1.537406 | 1.916023 | 1.6632335 | 1.66191354 |
+| 40        | 1.498820 | 1.940683 | 1.5425724 | 1.690805 | 1.863195 | 1.7040454 |
+| 50        | 1.6199005 | 1.7901430 | 1.6861869 | 1.535824 | 1.6842760 | 1.66117776 |
+| 60        | 1.520658 | 1.5445248 | 1.6582389 | 1.552610 | 1.6530308 | 1.58568426 |
+| 70        | 1.9213270 | 2.012382 | 2.108089 | 1.7889013 | 1.9263414 | 1.95140844 |
+| 80        | 2.508395 | 2.123804 | 2.492802 | 2.3137979 | 2.370727 | 2.31015414 |
+| 90        | 2.3677163 | 2.108692 | 2.1440287 | 2.3421870 | 2.0896315 | 2.21068654 |
+| 100       | 2.526475 | 2.088193 | 2.206255 | 2.197661 | 2.160998 | 2.24303164 |
+| 110       | 2.287102 | 2.1104159 | 2.71393 | 2.293894 | 2.253742 | 2.22673054 |
+| 120       | 2.6684425 | 2.3752618 | 2.520246 | 2.5079256 | 2.399710 | 2.49436938 |
+
+### KNNR(20 - 30)
+| Dimension | Cases 1 | Cases 2 | Cases 3 | Cases 4 | Cases 5 | Average |
+|-----------|---------|---------|---------|---------|---------|---------|
+| 20        | 0.9433333 | 0.9433333 | 0.9433333 | 0.9433333 | 0.9433333 | 0.9433333 |
+| 21        | 0.94833333 | 0.94833333 | 0.94833333 | 0.94833333 | 0.94833333 | 0.94833333 |
+| 22        | 0.94833333 | 0.94833333 | 0.94833333 | 0.94833333 | 0.94833333 | 0.94833333 |
+| 23        | 0.95     | 0.95     | 0.95     | 0.95     | 0.95     | 0.95     |
+| 24        | 0.95333333 | 0.95333333 | 0.95333333 | 0.95333333 | 0.95333333 | 0.95333333 |
+| 25        | 0.95333333 | 0.95333333 | 0.95333333 | 0.95333333 | 0.95333333 | 0.95333333 |
+| 26        | 0.95     | 0.95     | 0.95     | 0.95     | 0.95     | 0.95     |
+| 27        | 0.95     | 0.95     | 0.95     | 0.95     | 0.95     | 0.95     |
+| 28        | 0.95     | 0.95     | 0.95     | 0.95     | 0.95     | 0.95     |
+| 29        | 0.95     | 0.95     | 0.95     | 0.95     | 0.95     | 0.95     |
+| 30        | 0.95     | 0.95     | 0.95     | 0.95     | 0.95     | 0.95     |
+
+### Time (s) for KNNR(20 - 30)
+| Dimension | Cases 1 | Cases 2 | Cases 3 | Cases 4 | Cases 5 | Average |
+|-----------|---------|---------|---------|---------|---------|---------|
+| 20        | 1.6638116 | 1.5207074 | 1.5779807 | 1.4990960 | 1.7039218 | 1.5931035 |
+| 21        | 1.8932171 | 1.546899 | 1.865976 | 1.692845 | 1.692845 | 1.693716 |
+| 22        | 1.9428724 | 1.761938 | 1.643705 | 1.619642 | 1.592469 | 1.675553 |
+| 23        | 1.614594 | 1.771496 | 1.556698 | 1.618442 | 1.512085 | 1.615888 |
+| 24        | 1.577983 | 1.667453 | 1.523918 | 1.6228045 | 1.494136 | 1.577313 |
+| 25        | 1.8036468 | 1.6520707 | 1.4953409 | 1.6427415 | 1.7342717 | 1.665654 |
+| 26        | 1.781945 | 1.619937 | 1.683098 | 1.7008628 | 1.684772 | 1.680634 |
+| 27        | 1.642859 | 1.954542 | 1.710045 | 1.768658 | 1.678657 | 1.698985 |
+| 28        | 1.809805 | 2.963722 | 1.646985 | 1.792305 | 1.803241 | 1.87324 |
+| 29        | 1.711687 | 1.72164 | 1.566399 | 1.583281 | 1.583281 | 1.63325 |
+| 30        | 1.510058 | 1.6826395 | 1.537406 | 1.916023 | 1.6632335 | 1.659714 |
 It can be seen from the Table 1 that after PCA dimensionality reduction, the accuracy of KNNR algorithm is significantly higher than that of SVM algorithm and NCC algorithm, reaching 0.95, and the accuracy of SVM algorithm 0.92 is slightly higher than that of NCC algorithm 0.91. Therefore, next, we mainly study the accuracy and completion time of KNNR algorithm after PCA reduction of different dimensions.
+
 ## 4. Problems and solutions
 ### 4.1 The way of collecting dataset
 #### Problem
@@ -91,7 +181,46 @@ When applying PCA for data dimensionality reduction, we encountered the issue of
 #### Solution
 After thorough investigation, we discovered that scikit-learn does not directly compute PCA through eigenvalue decomposition; instead, it employs Singular Value Decomposition (SVD). Unlike eigenvalue decomposition, which requires the decomposed matrix to be square (thus necessitating the computation of the covariance matrix), SVD bypasses this step and directly reduces the original matrix’s dimensions. Notably, in the SVD calculation process, there is no appearance of the transformation matrix P, which represents the feature vectors forming the hyperplane. Consequently, we used a reverse approach: multiplying the transpose matrix of the reduced-dimension matrix by the pre-reduced matrix to obtain the transformation matrix P.
 This method avoids the computation of the covariance matrix and the eigenvalue decomposition of high-dimensional matrices, significantly enhancing program execution speed. We successfully reduced 200 images of size 100*100 to 100 dimensions within a time frame of 1 second.
+#### Using PCA with Eigen Decomposition to reduce the dimensionality of 10 images
+
+#### Using PCA with SVD to reduce the dimensionality of 200 images
 ### 4.3 System Optimization
+```python
+start_time = time.perf_counter()
+```
+```python
+# Number of principle components
+k = 100
+
+# Perform SVD on the training matrix
+U, S, Vt = np.linalg.svd(X_train_centered, full_matrices=False)
+
+# Select the first 100 principal components
+X_train_pca = U[:, :k]
+
+print(X_train_pca.shape)
+
+# Construct transformation matrix P
+P = np.dot(X_train_T, X_train_pca)
+
+print(P.shape)
+```
+```text
+(200, 100)
+(10000, 100)
+```
+```python
+end_time = time.perf_counter()
+```
+```python
+elapsed_time = end_time - start_time
+```
+```python
+print(f"PCA with SVD: {elapsed_time:.6f}s")
+```
+```text
+PCA with SVD: 0.682032s
+```
 #### Problem
 Due to the uncontrollable lighting conditions during dataset collection, it is inevitable that some photos suffer from low contrast (resulting in chaotic facial features) due to excessive darkness or brightness. Consequently, during the PCA process, a significant loss of crucial features occurs, leading to very low accuracy.
 #### Solution
