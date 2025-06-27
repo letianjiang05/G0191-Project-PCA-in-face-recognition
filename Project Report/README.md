@@ -7,23 +7,18 @@ In our face recognition project, we developed a real-time facial recognition pro
 graph TD
     A[Camera] --> B[Get testing set]
     C[Video] --> D[Get training set]
-    E[Camera] --> D
-    D --> F[Preprocessing]
-    B --> G[Preprocessing]
-    F --> H[Histogram Equalization]
-    G --> I[Histogram Equalization]
-    H --> J[Dimensionality reduction based on PCA]
-    I --> K[Dimensionality reduction based on PCA]
-    K --> L[Calculate the average face of each person]
-    I --> M[20*30 face images]
-    M --> N[600 gray face images with pixels of 100*100]
-    N --> O[Improve contrast and clarity]
-    O --> P[600 matrices of 1*100]
-    P --> Q["Get 20 average matrices (center points)"]
-    J --> R[Recognition and comparison based on k-NNR]
-    L --> R
-    Q --> R
-    R --> S[Result]
+    E[Camera] --> F[20*30 face images<br>20 people, 30 pictures each]
+    F --> G[600 face images with pixels of 100*100]
+    G --> H[600 matrices of 1*100]
+    B --> I[Uniform image size]
+    D --> J[Uniform image size]
+    I --> K[Dimension reduction based on PCA]
+    J --> L[Dimension reduction based on PCA]
+    L --> M[Calculate the average face of each person]
+    M --> N[Get 20 average matrices (center points)]
+    K --> O[Recognition and comparison based on k-NNR]
+    N --> O
+    O --> P[Result]
 ```
 ### 2.2 Code analysis
 #### Obtaining of the data set
@@ -143,7 +138,7 @@ class MultiClassSVM:
             correct_class_score = scores[np.arange(self.n_samples), self.y]
             margins = np.maximum(0, scores - correct_class_score[:, np.newaxis] + 1)
             margins[np.arange(self.n_samples), self.y] = 0
-            margins[margins > 0] = 1
+            margins[margins > 0] = 1s
             row_sum = np.sum(margins, axis=1)
             margins[np.arange(self.n_samples), self.y] = -row_sum
             dW = np.dot(self.X.T, margins) / self.n_samples
