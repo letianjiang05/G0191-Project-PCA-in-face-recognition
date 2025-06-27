@@ -276,8 +276,78 @@ When applying PCA for data dimensionality reduction, we encountered the issue of
 After thorough investigation, we discovered that scikit-learn does not directly compute PCA through eigenvalue decomposition; instead, it employs Singular Value Decomposition (SVD). Unlike eigenvalue decomposition, which requires the decomposed matrix to be square (thus necessitating the computation of the covariance matrix), SVD bypasses this step and directly reduces the original matrix’s dimensions. Notably, in the SVD calculation process, there is no appearance of the transformation matrix P, which represents the feature vectors forming the hyperplane. Consequently, we used a reverse approach: multiplying the transpose matrix of the reduced-dimension matrix by the pre-reduced matrix to obtain the transformation matrix P.
 This method avoids the computation of the covariance matrix and the eigenvalue decomposition of high-dimensional matrices, significantly enhancing program execution speed. We successfully reduced 200 images of size 100*100 to 100 dimensions within a time frame of 1 second.
 #### Using PCA with Eigen Decomposition to reduce the dimensionality of 10 images
+```python
+import numpy as np
+import matplotlib.pyplot as plt
 
+# data is the input data matrix,
+# n_dim is the number of dimensions to be reduced to
+def pca(data, n_dim):
+    # Set the number of rows and columns of the input data
+    # and assign them to N and D respectively.
+    N, D = np.shape(data)
+
+    # Calculate the mean of each column by subtracting
+    # the mean from each element of the matrix
+    data = data - np.mean(data, axis=0, keepdims=True)
+
+    # Calculate the covariance matrix
+    C = np.dot(data.T, data)/(N-1)
+
+    # Calculate eigenvalues and eigenvectors
+    eig_values, eig_vector = np.linalg.eig(C)
+
+    # Sort the eigenvalues and
+    # select n_dim larger eigenvalues
+    indexes = np.argsort(-eig_values)[:n_dim]
+
+    # Select the corresponding feature vectors
+    # to form a dimensionality reduction matrix
+    picked_eig_vector = eig_vector[:, indexes][:D, n_dim]
+
+    data_ndim = np.dot(data, picked_eig_vector)
+    return data_ndim, picked_eig_vector
+
+# Example usage
+start_time = time.perf_counter()
+data_ndim, picked_eig_vector = pca(X, 100)
+#print(data_ndim)
+
+end_time = time.perf_counter()
+elapsed_time = end_time - start_time
+print(f"PCA with Eigen Decomposition: {elapsed_time:.6f}s")
+```
+```text
+PCA with Eigen Decomposition: 188.805866s
+```
 #### Using PCA with SVD to reduce the dimensionality of 200 images
+start_time = time.perf_counter()
+
+# Number of principle components
+k = 100
+
+# Perform SVD on the training matrix
+U, S, Vt = np.linalg.svd(X_train_centered, full_matrices=False)
+
+# Select the first 100 principal components
+X_train_pca = U[:, :k]
+
+print(X_train_pca.shape)
+
+# Construct transformation matrix P
+P = np.dot(X_train.T, X_train_pca)
+
+print(P.shape)
+(200, 100)
+(10000, 100)
+
+end_time = time.perf_counter()
+elapsed_time = end_time - start_time
+print(f"PCA with SVD: {elapsed_time:.6f}s")
+```
+```text
+PCA with SVD: 0.682032s
+```
 ### 4.3 System Optimization
 ```python
 start_time = time.perf_counter()
