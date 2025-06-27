@@ -4,25 +4,38 @@ In our face recognition project, we developed a real-time facial recognition pro
 ## 2. Algorithm design
 ### 2.1 System flow chart
 ```mermaid
-graph TD
-    A[Camera] --> B[Get testing set]
-    C[Video] --> D[Get training set]
-    E[Camera] --> F[20*30 face images<br>20 people, 30 pictures each]
-    F --> G[600 face images with pixels of 100*100]
-    G --> H[600 matrices of 1*100]
-    B --> I[Uniform image size]
-    D --> J[Uniform image size]
-    I --> K[Dimension reduction based on PCA]
-    J --> L[Dimension reduction based on PCA]
-    L --> M[Calculate the average face of each person]
-    M --> N["Get 20 average matrices (center points)"]
-    K --> O[Recognition and comparison based on k-NNR]
-    N --> O
-    O --> P[Result]
+flowchart TD
+    A1(Camera) --> A2(Get Testing Set)
+    A2 --> A3(Preprocessing)
+    A3 --> A4(Histogram Equalization)
+    A4 --> A5(Dimensionality Reduction Based on PCA)
+
+    B1(Video) --> B2(GetTrainingSet)
+    B3(Camera) --> B2
+    B2 --> B4(Preprocessing)
+    B4 --> B5(Histogram Equalization)
+    B5 --> B6(Dimensionality Reduction Based on PCA)
+    B6 --> B7(Calculate Average Face)
+
+    C1(20*30 face images)
+    C1 --> C2(600 gray face images<br>100x100 pixels)
+    C2 --> C3(Enhance contrast & clarity)
+    C3 --> C4(600 matrices of 1x100)
+    C4 --> C5("20 average matrices<br>(center points)")
+    C5 -.-> B7
+    C4 -.-> B6
+    C3 -.-> B5
+    C2 -.-> B4
+    C1 -.-> B2
+
+  A5 --> D(Recognition and comparison<br>based on k-NNR)
+  B7 --> D
+  D --> E(Result)
+
 ```
 ### 2.2 Code analysis
 #### Obtaining of the data set
-In our project, both the training and testing image sets are made up of the images captured by a separated program. It can capture face images both from videos and webcam. The program is written in python using OpenCV 2.0. We asked our relatives send some short videos containing faces for us to gather images.
+In our project, both the training and testing image sets are made up of the images captured by a separated program. It can capture face images both from videos and webcam. The program is written in python using OpenCV 2.0. We asked our relatives send some short videos containing faces for us to gather images.\
 The program captures images from a video (or webcam), detects faces using the Haar cascade classifier, and optionally saves detected faces as images. Firstly, it continuously retrieves frames from the video (or webcam). Then, it converts the images to grayscale, and identifies faces based on intensity gradients. For each detected face, a bounding rectangle is drawn, and the face in the rectangle is saved as an image. Finally, the saved face images are resized to 100*100 pixels and stored in a directory, whose name is the name of the person who provided the face images. We got a training set containing a set of 20 people with 10 images each and a testing test containing 30 images each.
 #### Preprocessing
 The second step is to read the images from the folder to the main program, and preprocess them. We begin by listing the contents of the “face_train” directory using os.listdir(). Then, we resize each image to 100*100 pixels (though we have already done this in the dataset containing step, one more confirmation is more convincing), and perform histogram equalization on the images to make it easier to recognize. The resulting processed images are stored in the images list. Finally, we flatten each image into a one-dimensional array and create the feature matrix “X_train” for further analysis.
@@ -40,7 +53,7 @@ grayscale. The classifier detects faces in the grayscale frame using detectMulti
 7. Displaying Results: The recognized person’s label (name) is displayed on the frame using putText() and a bounding rectangle around the detected face.
 ## 3. Test results and discussion
 ### 3.1.Introduction
-In this session, we test the performance of our program through two cases. One is the algorithm of face recognition. Another is the Dimension of images through PCA. For the first case, to perform the experiment, we compared three different recognition algorithms horizontally, which are Nearest Center Classifier (NCC) , k-Nearest Neighbor Rule (k-NNR), and Support Vector Machines (SVM), to fine the one with the highest accuracy.
+In this session, we test the performance of our program through two cases. One is the algorithm of face recognition. Another is the Dimension of images through PCA. For the first case, to perform the experiment, we compared three different recognition algorithms horizontally, which are Nearest Center Classifier (NCC) , k-Nearest Neighbor Rule (k-NNR), and Support Vector Machines (SVM), to fine the one with the highest accuracy.\
 Among them, NCC and k-NNR both use the Euclidean distance between the training vector and the test vector to calculate the training vector closest to the test vector. However, NCC calculates the average vector of which training vector the test vector is closest to. And k-NNR calculates which category has the most among the k training vectors closest to the test vector.
 #### Using k-NNR for face recognition:
 ```python
@@ -77,7 +90,7 @@ for i in range(len(X_test)):
 
     #print(i)
 ```
-Using NCC for face recognition:
+#### Using NCC for face recognition:
 ```python
 # Calculate the Euclidean norm between each test vector
 # and each average training vector
@@ -167,19 +180,17 @@ class MultiClassSVM:
     def get_losses(self):
         return self.losses
 ```
+For the second case, we try to find the parameter of dimension that best fit the
+PCA algorithm through testing the success rate and the calculation speed.
 #### 3.1.3 Support Vector Machines (SVM)
 ##### Pros
-- Effective in high dimensional spaces: SVMs are effective when the number of dimensions is greater than the number of samples.
-- Robust to outliers: SVMs are less sensitive to outliers as they focus on the instances near the decision boundary (support vectors).
-- Kernel: SVMs can solve non-linear problems using the kernel, mapping their inputs into high-dimensional feature spaces.
+- **Effective in high dimensional spaces**: SVMs are effective when the number of dimensions is greater than the number of samples.
+- **Robust to outliers**: SVMs are less sensitive to outliers as they focus on the instances near the decision boundary (support vectors).
+- **Kernel**: SVMs can solve non-linear problems using the kernel, mapping their inputs into high-dimensional feature spaces.
 
 ###### Cons
-- Complexity and tuning: The choice of the appropriate kernel function can be complex. Also, SVMs have several hyperparameters (like C, gamma) which need to be optimally tuned, which can be time-consuming.
-- Not directly applicable to multi-class classification: SVMs are inherently binary classifiers. For multi-class problems, strategies like one-vs-one or one-vs-all need to be applied.
-Using k-NNR for face recognition:
-```python
-```
-
+- **Complexity and tuning**: The choice of the appropriate kernel function can be complex. Also, SVMs have several hyperparameters (like C, gamma) which need to be optimally tuned, which can be time-consuming.
+- **Not directly applicable to multi-class classification**: SVMs are inherently binary classifiers. For multi-class problems, strategies like one-vs-one or one-vs-all need to be applied.
 ## 3.2 Comparison among Different Algorithms of face recognitio
 ### Results of Different Algorithms
 | Average Accuracy | KNNR | NCC  | SVM  |
@@ -195,6 +206,9 @@ Using k-NNR for face recognition:
 | 100              | 0.948333 | 0.9116667 | 0.9183333 |
 | 110              | 0.948333 | 0.9116667 | 0.9183333 |
 | 120              | 0.948333 | 0.9116667 | 0.9183333 |
+
+
+It can be seen from the Table 1 that after PCA dimensionality reduction, the accuracy of KNNR algorithm is significantly higher than that of SVM algorithm and NCC algorithm, reaching 0.95, and the accuracy of SVM algorithm 0.92 is slightly higher than that of NCC algorithm 0.91. Therefore, next, we mainly study the accuracy and completion time of KNNR algorithm after PCA reduction of different dimensions.
 ## 3.3 Comparison among Different Dimensions of images through PCA
 ### KNNR
 | Dimension | Cases 1 | Cases 2 | Cases 3 | Cases 4 | Cases 5 | Average |
@@ -255,9 +269,6 @@ Using k-NNR for face recognition:
 | 28        | 1.809805 | 2.963722 | 1.646985 | 1.792305 | 1.803241 | 1.87324 |
 | 29        | 1.711687 | 1.72164 | 1.566399 | 1.583281 | 1.583281 | 1.63325 |
 | 30        | 1.510058 | 1.6826395 | 1.537406 | 1.916023 | 1.6632335 | 1.659714 |
-
-It can be seen from the Table 1 that after PCA dimensionality reduction, the accuracy of KNNR algorithm is significantly higher than that of SVM algorithm and NCC algorithm, reaching 0.95, and the accuracy of SVM algorithm 0.92 is slightly higher than that of NCC algorithm 0.91. Therefore, next, we mainly study the accuracy and completion time of KNNR algorithm after PCA reduction of different dimensions.
-
 ## 4. Problems and solutions
 ### 4.1 The way of collecting dataset
 #### Problem
@@ -268,7 +279,7 @@ We addressed the slow data collection and insufficient sample size by employing 
 #### Problem
 When applying PCA for data dimensionality reduction, we encountered the issue of slow computation speed. Although we attempted to accelerate the process using Google Colab, reducing 10 images with 10,000 dimensions to 100 dimensions still took 188 seconds. However, during the same period, we found that the PCA computation speed was significantly faster when we use the algorithm of PCA from scikit-learn library.
 #### Solution
-After thorough investigation, we discovered that scikit-learn does not directly compute PCA through eigenvalue decomposition; instead, it employs Singular Value Decomposition (SVD). Unlike eigenvalue decomposition, which requires the decomposed matrix to be square (thus necessitating the computation of the covariance matrix), SVD bypasses this step and directly reduces the original matrix’s dimensions. Notably, in the SVD calculation process, there is no appearance of the transformation matrix P, which represents the feature vectors forming the hyperplane. Consequently, we used a reverse approach: multiplying the transpose matrix of the reduced-dimension matrix by the pre-reduced matrix to obtain the transformation matrix P.
+After thorough investigation, we discovered that scikit-learn does not directly compute PCA through eigenvalue decomposition; instead, it employs Singular Value Decomposition (SVD). Unlike eigenvalue decomposition, which requires the decomposed matrix to be square (thus necessitating the computation of the covariance matrix), SVD bypasses this step and directly reduces the original matrix’s dimensions. Notably, in the SVD calculation process, there is no appearance of the transformation matrix P, which represents the feature vectors forming the hyperplane. Consequently, we used a reverse approach: multiplying the transpose matrix of the reduced-dimension matrix by the pre-reduced matrix to obtain the transformation matrix P.\
 This method avoids the computation of the covariance matrix and the eigenvalue decomposition of high-dimensional matrices, significantly enhancing program execution speed. We successfully reduced 200 images of size 100*100 to 100 dimensions within a time frame of 1 second.
 #### Using PCA with Eigen Decomposition to reduce the dimensionality of 10 images
 ```python
@@ -316,6 +327,7 @@ print(f"PCA with Eigen Decomposition: {elapsed_time:.6f}s")
 PCA with Eigen Decomposition: 188.805866s
 ```
 #### Using PCA with SVD to reduce the dimensionality of 200 images
+```python
 start_time = time.perf_counter()
 
 # Number of principle components
@@ -343,7 +355,6 @@ print(f"PCA with SVD: {elapsed_time:.6f}s")
 ```text
 PCA with SVD: 0.682032s
 ```
-### 4.3 System Optimization
 ```python
 start_time = time.perf_counter()
 ```
@@ -380,6 +391,7 @@ print(f"PCA with SVD: {elapsed_time:.6f}s")
 ```text
 PCA with SVD: 0.682032s
 ```
+### 4.3 System Optimization
 #### Problem
 Due to the uncontrollable lighting conditions during dataset collection, it is inevitable that some photos suffer from low contrast (resulting in chaotic facial features) due to excessive darkness or brightness. Consequently, during the PCA process, a significant loss of crucial features occurs, leading to very low accuracy.
 #### Solution
@@ -387,7 +399,26 @@ We employed the method of histogram equalization to enhance the clarity of overl
 1. Compute the Histogram: Based on pixel distribution, calculate the statistical histogram, which represents the count of each pixel level.
 2. Normalize and Accumulate: Calculate the normalized histogram and cumulative histogram.
 3. Perform Interval Transformation: Transform the cumulative histogram to obtain a new pixel-level distribution (typically mapped to the range [0, 255]).
+
 Through this process, image contrast is increased, and important features (such as eyes and mouth) become more pronounced. As a result, the accuracy improved significantly—from an initial 0.643 to an impressive 0.948.
+##### Accuracy without Histogram Equalization
+```python
+print(f"The number of True: {true_count}")
+print(f"Accuracy without Histogram Equalization: {true_count/len(X_test)}")
+```
+```text
+The number of True: 386
+Accuracy without Histogram Equalization: 0.6433333333333333
+```
+##### Accuracy with Histogram Equalization
+```python
+print(f"The number of True: {true_count}")
+print(f"Accuracy with Histogram Equalization: {true_count/len(X_test)}")
+```
+```text
+The number of True: 569
+Accuracy with Histogram Equalization: 0.9483333333333334
+```
 ## 5. Future Directions and Conclusion
 ### 5.1 Future Directions
 1. Model Parameter Tuning: The performance of SVM is highly dependent on the choice of parameters such as the cost parameter (C) and the kernel coefficient (gamma). Using techniques like grid search (GridSearchCV) or randomized search (RandomizedSearchCV) could be beneficial in finding the optimal hyperparameters for the SVM classifier.
