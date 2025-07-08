@@ -10,7 +10,7 @@ flowchart TD
     A3 --> A4(Histogram Equalization)
     A4 --> A5(Dimensionality Reduction Based on PCA)
 
-    B1(Video) --> B2(GetTrainingSet)
+    B1(Video) --> B2(Get Training Set)
     B3(Camera) --> B2
     B2 --> B4(Preprocessing)
     B4 --> B5(Histogram Equalization)
@@ -18,9 +18,9 @@ flowchart TD
     B6 --> B7(Calculate Average Face)
 
     C1(20*30 face images)
-    C1 --> C2(600 gray face images<br>100x100 pixels)
+    C1 --> C2(600 gray face images<br>100*100 pixels)
     C2 --> C3(Enhance contrast & clarity)
-    C3 --> C4(600 matrices of 1x100)
+    C3 --> C4(600 matrices of 1*100)
     C4 --> C5("20 average matrices<br>(center points)")
     C5 -.-> B7
     C4 -.-> B6
@@ -182,6 +182,15 @@ class MultiClassSVM:
 ```
 For the second case, we try to find the parameter of dimension that best fit the
 PCA algorithm through testing the success rate and the calculation speed.
+#### 3.1.2 Nearest Center Classifier (NCC)
+##### Pros
+- **Simplicity**: NCC is also a simple method where the class of a new instance is determined by the class of the nearest mean of the training instances.
+- **Efficiency**: NCC is computationally efficient as it only requires the computation of the distances to the class centers.
+- It works well when the data is well separated.
+##### Cons
+- **Assumptions about data**: NCC assumes that the data is normally distributed and the classes are equally distributed, which may not be the case in real-world data.
+- **Sensitivity to outliers**: NCC is sensitive to outliers as they can significantly shift the class centers.
+- It may not work well when the data is not well separated or when the class distributions are imbalanced.
 #### 3.1.3 Support Vector Machines (SVM)
 ##### Pros
 - **Effective in high dimensional spaces**: SVMs are effective when the number of dimensions is greater than the number of samples.
